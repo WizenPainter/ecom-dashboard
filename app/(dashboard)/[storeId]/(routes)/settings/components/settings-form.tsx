@@ -15,6 +15,8 @@ import { Heading } from "@/components/ui/heading";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { AlertModal } from "@/components/modals/alert-modal";
+import { ApiAlert } from "@/components/ui/api-alert";
 
 interface SettingsFormProps {
     initialData: Store;
@@ -53,8 +55,29 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
         };
     }
 
+    const onDelete = async () => {
+        try {
+            setLoading(true);
+            await axios.delete(`/api/stores/${params.storeId}`);
+            router.refresh();
+            router.push("/");
+            toast.success("Store deleted.");
+        } catch (error) {
+            toast.error("Make sure you remove all products and categories first.")
+        } finally {
+            setOpen(false);
+            setOpen(false);
+        }
+    }
+
     return (
         <>
+            <AlertModal 
+                isOpen={open}
+                onClose={() => setOpen(false)}
+                onConfirm={() => onDelete()}
+                loading={loading}
+            />
             <div className="flex items-center justify-between">
                 <Heading 
                     title="Settings"
@@ -92,6 +115,12 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({ initialData }) => {
                     </Button>
                 </form>
             </Form>
+            <Separator />
+            <ApiAlert 
+            title="NEXT_PUBLIC_API_URL" 
+            description={`${origin}/api/${params.storeId}}`} 
+            variant="public"
+            />
         </>
     );
 }
